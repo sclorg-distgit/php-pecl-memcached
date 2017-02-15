@@ -1,3 +1,5 @@
+# centos/sclo spec file for php-pecl-memcached, from:
+#
 # remirepo spec file for php-pecl-memcached
 # With SCL compatibility, from:
 #
@@ -10,15 +12,17 @@
 # Please, preserve the changelog entries
 #
 %if 0%{?scl:1}
-%global sub_prefix %{scl_prefix}
+%global sub_prefix   %{scl_prefix}
+%if "%{scl}" == "rh-php70"
+%global sub_prefix   sclo-php70-
+%endif
 %scl_package         php-pecl-memcached
 %else
 %global _root_prefix %{_prefix}
 %endif
 
-%global with_fastlz 1
+%global with_fastlz 0
 %global with_igbin  1
-%global with_zts    0%{!?_without_zts:%{?__ztsphp:1}}
 %global with_tests  0%{!?_without_tests:1}
 %global pecl_name   memcached
 # After 40-igbinary, 40-json, 40-msgpack
@@ -38,10 +42,10 @@ BuildRequires: %{?scl_prefix}php-devel >= 7
 BuildRequires: %{?scl_prefix}php-pear
 BuildRequires: %{?scl_prefix}php-json
 %if %{with_igbin}
-BuildRequires: %{?sub_prefix}php-pecl-igbinary-devel
+BuildRequires: %{?scl_prefix}php-pecl-igbinary-devel
 %endif
 %ifnarch ppc64
-BuildRequires: %{?sub_prefix}php-pecl-msgpack-devel
+BuildRequires: %{?scl_prefix}php-pecl-msgpack-devel
 %endif
 BuildRequires: zlib-devel
 BuildRequires: cyrus-sasl-devel
@@ -53,19 +57,19 @@ BuildRequires: memcached
 %endif
 
 BuildRequires: libevent-devel >= 2.0.2
-# To ensure use of libmemcached-last for --enable-memcached-protocol
-BuildRequires: libmemcached-devel  >= 1.0.16
+# The oldest actively tested version is 1.0.2
+# It is highly recommended to use version 1.0.18
+BuildRequires: libmemcached-devel  >= 1.0.2
 
 Requires:     %{?scl_prefix}php(zend-abi) = %{php_zend_api}
 Requires:     %{?scl_prefix}php(api) = %{php_core_api}
 Requires:     %{?scl_prefix}php-json%{?_isa}
 %if %{with_igbin}
-Requires:     %{?sub_prefix}php-pecl-igbinary%{?_isa}
+Requires:     %{?scl_prefix}php-pecl-igbinary%{?_isa}
 %endif
 %ifnarch ppc64
-Requires:     %{?sub_prefix}php-pecl-msgpack%{?_isa}
+Requires:     %{?scl_prefix}php-pecl-msgpack%{?_isa}
 %endif
-%{?_sclreq:Requires: %{?scl_prefix}runtime%{?_sclreq}%{?_isa}}
 
 Provides:     %{?scl_prefix}php-%{pecl_name}               = %{version}
 Provides:     %{?scl_prefix}php-%{pecl_name}%{?_isa}       = %{version}
@@ -74,30 +78,6 @@ Provides:     %{?scl_prefix}php-pecl(%{pecl_name})%{?_isa} = %{version}
 %if "%{?scl_prefix}" != "%{?sub_prefix}"
 Provides:     %{?scl_prefix}php-pecl-%{pecl_name}          = %{version}-%{release}
 Provides:     %{?scl_prefix}php-pecl-%{pecl_name}%{?_isa}  = %{version}-%{release}
-%endif
-
-%if "%{?vendor}" == "Remi Collet" && 0%{!?scl:1} && 0%{?rhel}
-# Other third party repo stuff
-Obsoletes:     php53-pecl-%{pecl_name}  <= %{version}
-Obsoletes:     php53u-pecl-%{pecl_name} <= %{version}
-Obsoletes:     php54-pecl-%{pecl_name}  <= %{version}
-Obsoletes:     php54w-pecl-%{pecl_name} <= %{version}
-%if "%{php_version}" > "5.5"
-Obsoletes:     php55u-pecl-%{pecl_name} <= %{version}
-Obsoletes:     php55w-pecl-%{pecl_name} <= %{version}
-%endif
-%if "%{php_version}" > "5.6"
-Obsoletes:     php56u-pecl-%{pecl_name} <= %{version}
-Obsoletes:     php56w-pecl-%{pecl_name} <= %{version}
-%endif
-%if "%{php_version}" > "7.0"
-Obsoletes:     php70u-pecl-%{pecl_name} <= %{version}
-Obsoletes:     php70w-pecl-%{pecl_name} <= %{version}
-%endif
-%if "%{php_version}" > "7.1"
-Obsoletes:     php71u-pecl-%{pecl_name} <= %{version}
-Obsoletes:     php71w-pecl-%{pecl_name} <= %{version}
-%endif
 %endif
 
 %if 0%{?fedora} < 20 && 0%{?rhel} < 7
@@ -168,14 +148,8 @@ EOF
 # default options with description from upstream
 cat NTS/memcached.ini >>%{ini_name}
 
-%if %{with_zts}
-cp -r NTS ZTS
-%endif
-
 
 %build
-%{?dtsenable}
-
 # only needed for SCL
 export PKG_CONFIG_PATH=%{_libdir}/pkgconfig
 
@@ -204,32 +178,16 @@ cd NTS
 peclconf %{_bindir}/php-config
 make %{?_smp_mflags}
 
-%if %{with_zts}
-cd ../ZTS
-%{_bindir}/zts-phpize
-peclconf %{_bindir}/zts-php-config
-make %{?_smp_mflags}
-%endif
-
 
 %install
-%{?dtsenable}
-
 # Install the NTS extension
 make install -C NTS INSTALL_ROOT=%{buildroot}
 
 # Drop in the bit of configuration
-# rename to z-memcached to be load after msgpack
 install -D -m 644 %{ini_name} %{buildroot}%{php_inidir}/%{ini_name}
 
 # Install XML package description
 install -D -m 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
-
-# Install the ZTS extension
-%if %{with_zts}
-make install -C ZTS INSTALL_ROOT=%{buildroot}
-install -D -m 644 %{ini_name} %{buildroot}%{php_ztsinidir}/%{ini_name}
-%endif
 
 # Documentation
 cd NTS
@@ -238,7 +196,6 @@ do install -Dpm 644 $i %{buildroot}%{pecl_docdir}/%{pecl_name}/$i
 done
 
 
-%if 0%{?fedora} < 24
 # when pear installed alone, after us
 %triggerin -- %{?scl_prefix}php-pear
 if [ -x %{__pecl} ] ; then
@@ -255,7 +212,6 @@ fi
 if [ $1 -eq 0 -a -x %{__pecl} ] ; then
     %{pecl_uninstall} %{pecl_name} >/dev/null || :
 fi
-%endif
 
 
 %check
@@ -268,13 +224,6 @@ OPT="-n"
 %{__php} $OPT \
     -d extension=%{buildroot}%{php_extdir}/%{pecl_name}.so \
     --modules | grep %{pecl_name}
-
-%if %{with_zts}
-: Minimal load test for ZTS extension
-%{__ztsphp} $OPT \
-    -d extension=%{buildroot}%{php_ztsextdir}/%{pecl_name}.so \
-    --modules | grep %{pecl_name}
-%endif
 
 %if %{with_tests}
 # XFAIL and very slow so no value
@@ -297,18 +246,6 @@ REPORT_EXIT_STATUS=1 \
 %{__php} -n run-tests.php --show-diff || ret=1
 popd
 
-%if %{with_zts}
-: Run the upstream test Suite for ZTS extension
-pushd ZTS
-rm tests/flush_buffers.phpt tests/touch_binary.phpt
-TEST_PHP_EXECUTABLE=%{__ztsphp} \
-TEST_PHP_ARGS="$OPT -d extension=$PWD/modules/%{pecl_name}.so" \
-NO_INTERACTION=1 \
-REPORT_EXIT_STATUS=1 \
-%{__ztsphp} -n run-tests.php --show-diff || ret=1
-popd
-%endif
-
 # Cleanup
 if [ -f memcached.pid ]; then
    kill $(cat memcached.pid)
@@ -326,13 +263,12 @@ exit $ret
 %config(noreplace) %{php_inidir}/%{ini_name}
 %{php_extdir}/%{pecl_name}.so
 
-%if %{with_zts}
-%config(noreplace) %{php_ztsinidir}/%{ini_name}
-%{php_ztsextdir}/%{pecl_name}.so
-%endif
-
 
 %changelog
+* Wed Feb 15 2017 Remi Collet <remi@fedoraproject.org> - 3.0.2-1
+- cleanup for SCLo build
+- use bundled fastlz
+
 * Mon Feb 13 2017 Remi Collet <remi@fedoraproject.org> - 3.0.2-1
 - update to 3.0.2 (php 7, stable)
 
