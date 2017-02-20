@@ -30,7 +30,7 @@
 
 Summary:      Extension to work with the Memcached caching daemon
 Name:         %{?sub_prefix}php-pecl-memcached
-Version:      3.0.2
+Version:      3.0.3
 Release:      1%{?dist}%{!?scl:%{!?nophptag:%(%{__php} -r 'echo ".".PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')}}
 License:      PHP
 Group:        Development/Languages
@@ -163,11 +163,7 @@ peclconf() {
 %ifnarch ppc64
            --enable-memcached-msgpack \
 %endif
-%if 1
-           --disable-memcached-protocol \
-%else
            --enable-memcached-protocol \
-%endif
 %if %{with_fastlz}
            --with-system-fastlz \
 %endif
@@ -265,6 +261,10 @@ exit $ret
 
 
 %changelog
+* Mon Feb 20 2017 Remi Collet <remi@fedoraproject.org> - 3.0.3-1
+- update to 3.0.3 (php 7, stable)
+- build with --enable-memcached-protocol option
+
 * Wed Feb 15 2017 Remi Collet <remi@fedoraproject.org> - 3.0.2-1
 - cleanup for SCLo build
 - use bundled fastlz
