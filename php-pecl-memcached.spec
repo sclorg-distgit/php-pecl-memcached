@@ -31,12 +31,16 @@
 Summary:      Extension to work with the Memcached caching daemon
 Name:         %{?sub_prefix}php-pecl-memcached
 Version:      3.0.3
-Release:      1%{?dist}%{!?scl:%{!?nophptag:%(%{__php} -r 'echo ".".PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')}}
+Release:      2%{?dist}%{!?scl:%{!?nophptag:%(%{__php} -r 'echo ".".PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')}}
 License:      PHP
 Group:        Development/Languages
 URL:          http://pecl.php.net/package/%{pecl_name}
 
 Source0:      http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
+
+# See https://github.com/php-memcached-dev/php-memcached/pull/330
+# And https://github.com/php-memcached-dev/php-memcached/issues/310
+Patch0:        %{pecl_name}-pr330.patch
 
 BuildRequires: %{?scl_prefix}php-devel >= 7
 BuildRequires: %{?scl_prefix}php-pear
@@ -110,6 +114,7 @@ sed -e 's/role="test"/role="src"/' \
     -i package.xml
 
 cd NTS
+%patch0 -p1 -b .pr330
 
 %if %{with_fastlz}
 rm -r fastlz
@@ -261,6 +266,9 @@ exit $ret
 
 
 %changelog
+* Tue Feb 21 2017 Remi Collet <remi@fedoraproject.org> - 3.0.3-2
+- switch memcached.sess_binary_protocol off by default
+
 * Mon Feb 20 2017 Remi Collet <remi@fedoraproject.org> - 3.0.3-1
 - update to 3.0.3 (php 7, stable)
 - build with --enable-memcached-protocol option
