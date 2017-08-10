@@ -16,6 +16,9 @@
 %if "%{scl}" == "rh-php70"
 %global sub_prefix   sclo-php70-
 %endif
+%if "%{scl}" == "rh-php71"
+%global sub_prefix   sclo-php71-
+%endif
 %scl_package         php-pecl-memcached
 %else
 %global _root_prefix %{_prefix}
@@ -31,7 +34,7 @@
 Summary:      Extension to work with the Memcached caching daemon
 Name:         %{?sub_prefix}php-pecl-memcached
 Version:      3.0.3
-Release:      2%{?dist}%{!?scl:%{!?nophptag:%(%{__php} -r 'echo ".".PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')}}
+Release:      3%{?dist}
 License:      PHP
 Group:        Development/Languages
 URL:          http://pecl.php.net/package/%{pecl_name}
@@ -266,6 +269,9 @@ exit $ret
 
 
 %changelog
+* Thu Aug 10 2017 Remi Collet <remi@remirepo.net> - 3.0.3-3
+- change for sclo-php71
+
 * Tue Feb 21 2017 Remi Collet <remi@fedoraproject.org> - 3.0.3-2
 - switch memcached.sess_binary_protocol off by default
 
