@@ -24,7 +24,6 @@
 %global _root_prefix %{_prefix}
 %endif
 
-%global with_fastlz 0
 %global with_igbin  1
 %global with_tests  0%{!?_without_tests:1}
 %global pecl_name   memcached
@@ -33,8 +32,8 @@
 
 Summary:      Extension to work with the Memcached caching daemon
 Name:         %{?sub_prefix}php-pecl-memcached
-Version:      3.0.3
-Release:      3%{?dist}
+Version:      3.0.4
+Release:      1%{?dist}
 License:      PHP
 Group:        Development/Languages
 URL:          http://pecl.php.net/package/%{pecl_name}
@@ -56,9 +55,6 @@ BuildRequires: %{?scl_prefix}php-pecl-msgpack-devel
 %endif
 BuildRequires: zlib-devel
 BuildRequires: cyrus-sasl-devel
-%if %{with_fastlz}
-BuildRequires: fastlz-devel
-%endif
 %if %{with_tests}
 BuildRequires: memcached
 %endif
@@ -119,11 +115,6 @@ sed -e 's/role="test"/role="src"/' \
 cd NTS
 %patch0 -p1 -b .pr330
 
-%if %{with_fastlz}
-rm -r fastlz
-sed -e '/name=.fastlz/d' -i ../package.xml
-%endif
-
 # Check version as upstream often forget to update this
 extver=$(sed -n '/#define PHP_MEMCACHED_VERSION/{s/.* "//;s/".*$//;p}' php_memcached.h)
 if test "x${extver}" != "x%{version}%{?gh_date:-dev}%{?intver}"; then
@@ -172,9 +163,6 @@ peclconf() {
            --enable-memcached-msgpack \
 %endif
            --enable-memcached-protocol \
-%if %{with_fastlz}
-           --with-system-fastlz \
-%endif
            --with-php-config=$1
 }
 cd NTS
@@ -269,6 +257,9 @@ exit $ret
 
 
 %changelog
+* Tue Nov 21 2017 Remi Collet <remi@remirepo.net> - 3.0.4-1
+- Update to 3.0.4
+
 * Thu Aug 10 2017 Remi Collet <remi@remirepo.net> - 3.0.3-3
 - change for sclo-php71
 
