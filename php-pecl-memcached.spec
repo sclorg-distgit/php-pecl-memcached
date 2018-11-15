@@ -5,7 +5,7 @@
 #
 # Fedora spec file for php-pecl-memcached
 #
-# Copyright (c) 2009-2017 Remi Collet
+# Copyright (c) 2009-2018 Remi Collet
 # License: CC-BY-SA
 # http://creativecommons.org/licenses/by-sa/4.0/
 #
@@ -18,6 +18,9 @@
 %endif
 %if "%{scl}" == "rh-php71"
 %global sub_prefix   sclo-php71-
+%endif
+%if "%{scl}" == "rh-php72"
+%global sub_prefix   sclo-php72-
 %endif
 %scl_package         php-pecl-memcached
 %else
@@ -33,7 +36,7 @@
 Summary:      Extension to work with the Memcached caching daemon
 Name:         %{?sub_prefix}php-pecl-memcached
 Version:      3.0.4
-Release:      1%{?dist}
+Release:      2%{?dist}
 License:      PHP
 Group:        Development/Languages
 URL:          http://pecl.php.net/package/%{pecl_name}
@@ -257,6 +260,9 @@ exit $ret
 
 
 %changelog
+* Thu Nov 15 2018 Remi Collet <remi@remirepo.net> - 3.0.4-2
+- build for sclo-php72
+
 * Tue Nov 21 2017 Remi Collet <remi@remirepo.net> - 3.0.4-1
 - Update to 3.0.4
 
