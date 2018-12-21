@@ -35,17 +35,13 @@
 
 Summary:      Extension to work with the Memcached caching daemon
 Name:         %{?sub_prefix}php-pecl-memcached
-Version:      3.0.4
-Release:      2%{?dist}
+Version:      3.1.0
+Release:      1%{?dist}
 License:      PHP
 Group:        Development/Languages
 URL:          http://pecl.php.net/package/%{pecl_name}
 
 Source0:      http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
-
-# See https://github.com/php-memcached-dev/php-memcached/pull/330
-# And https://github.com/php-memcached-dev/php-memcached/issues/310
-Patch0:        %{pecl_name}-pr330.patch
 
 BuildRequires: %{?scl_prefix}php-devel >= 7
 BuildRequires: %{?scl_prefix}php-pear
@@ -116,8 +112,6 @@ sed -e 's/role="test"/role="src"/' \
     -i package.xml
 
 cd NTS
-%patch0 -p1 -b .pr330
-
 # Check version as upstream often forget to update this
 extver=$(sed -n '/#define PHP_MEMCACHED_VERSION/{s/.* "//;s/".*$//;p}' php_memcached.h)
 if test "x${extver}" != "x%{version}%{?gh_date:-dev}%{?intver}"; then
@@ -260,6 +254,10 @@ exit $ret
 
 
 %changelog
+* Fri Dec 21 2018 Remi Collet <remi@remirepo.net> - 3.1.0-1
+- Update to 3.1.0
+- drop patch merged upstream
+
 * Thu Nov 15 2018 Remi Collet <remi@remirepo.net> - 3.0.4-2
 - build for sclo-php72
 
